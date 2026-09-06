@@ -144,6 +144,14 @@ export const IconNeuron = (p: P) => (
   </svg>
 );
 
+export const IconBook = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Z" />
+    <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" />
+    <path d="M9 7.5h6M9 11h4" />
+  </svg>
+);
+
 export const IconHippo = (p: P) => (
   <svg {...base(p)}>
     <path d="M4 15.5C4 9 8 5.5 12.5 5.5S20 9.5 20 13.5c0 3-2 5-4.6 5H6a2 2 0 0 1-2-3Z" />

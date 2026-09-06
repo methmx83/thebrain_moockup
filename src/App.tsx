@@ -4,6 +4,7 @@ import { DAY, HOUR, computeSynapses, consolidate, fmtClockOffset, strengthNow } 
 import { useMemoryStore } from "./lib/store";
 import CapturePanel from "./components/CapturePanel";
 import ExportPanel from "./components/ExportPanel";
+import Manual from "./components/Manual";
 import MemoryList from "./components/MemoryList";
 import NeuralCanvas from "./components/NeuralCanvas";
 import ParticleField from "./components/ParticleField";
@@ -14,6 +15,7 @@ import Toasts from "./components/Toasts";
 import type { Toast } from "./components/Toasts";
 import {
   IconBolt,
+  IconBook,
   IconBrainWave,
   IconChart,
   IconFastForward,
@@ -36,6 +38,7 @@ export default function App() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
   const [sleepReport, setSleepReport] = useState<ConsolidationReport | null>(null);
+  const [manualOpen, setManualOpen] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [confirmWipe, setConfirmWipe] = useState(false);
   const pendingSleep = useRef<{ memories: Memory[]; boosts: Record<string, number> } | null>(null);
@@ -137,14 +140,18 @@ export default function App() {
     addToast("Cortex geleert. Tabula rasa — wie nach einem sehr tiefen Schlaf.", "warn");
   }, [confirmWipe, store, addToast]);
 
-  /* ---- Hotkey: / fokussiert die Suche ---- */
+  /* ---- Hotkeys: / fokussiert die Suche, ? öffnet das Handbuch ---- */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "/") return;
+      if (e.key !== "/" && e.key !== "?") return;
       const el = document.activeElement;
       const tag = el?.tagName?.toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select") return;
       e.preventDefault();
+      if (e.key === "?") {
+        setManualOpen((v) => !v);
+        return;
+      }
       setTab("spuren");
       window.setTimeout(() => searchRef.current?.focus(), 30);
     };
@@ -222,13 +229,22 @@ export default function App() {
               )}
             </div>
 
-            <button
-              onClick={startSleep}
-              disabled={sleepReport !== null}
-              className="btn-press flex items-center gap-2 rounded-xl bg-teal px-4 py-2.5 font-display text-[13.5px] font-bold text-ink shadow-lg shadow-teal/20 hover:bg-[#63e0ca] disabled:opacity-60"
-            >
-              <IconMoon size={16} /> Schlafzyklus starten
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setManualOpen(true)}
+                title="Funktions- & Betriebsanleitung (Taste ?)"
+                className="btn-press flex items-center gap-2 rounded-xl border border-line bg-ink/50 px-4 py-2.5 font-display text-[13.5px] font-bold text-mist hover:border-amber/50 hover:text-amber"
+              >
+                <IconBook size={16} /> Anleitung
+              </button>
+              <button
+                onClick={startSleep}
+                disabled={sleepReport !== null}
+                className="btn-press flex items-center gap-2 rounded-xl bg-teal px-4 py-2.5 font-display text-[13.5px] font-bold text-ink shadow-lg shadow-teal/20 hover:bg-[#63e0ca] disabled:opacity-60"
+              >
+                <IconMoon size={16} /> Schlafzyklus starten
+              </button>
+            </div>
           </div>
         </header>
 
@@ -373,6 +389,7 @@ export default function App() {
       </div>
 
       {sleepReport && <SleepOverlay report={sleepReport} onDone={finishSleep} />}
+      <Manual open={manualOpen} onClose={() => setManualOpen(false)} />
       <Toasts items={toasts} onDismiss={(id) => setToasts((prev) => prev.filter((t) => t.id !== id))} />
     </div>
   );

@@ -60,10 +60,42 @@ ENGRAMM läuft jetzt komplett lokal auf deinem Rechner. Keine Daten verlassen de
   JSON — praktisch für Backups oder den Umzug auf einen anderen Rechner/Browser.
 - **In-App-Anleitung:** Taste `?` öffnet die komplette Funktions- & Betriebsanleitung.
 
+## Windows: Nach dem Entpacken liegt nur eine Datei „workspace" ohne Endung da
+
+Kein Fehler — der Download ist **doppelt gepackt**: In der `Workspace.tar` steckt ein zweites,
+komprimiertes Archiv, das Windows ohne Endung ablegt. So löst du es (PowerShell, im Ordner der
+Datei `workspace`):
+
+```powershell
+# 1. Endung wiederherstellen und erneut entpacken:
+Rename-Item workspace workspace.tar.gz
+tar -xf workspace.tar.gz
+```
+
+Danach enthält der entpackte Ordner die Projektdateien (`package.json`, `src/`, `README.md` …) —
+weiter mit `npm install` und `npm run dev`.
+
+**Falls das nicht klappt**, kurz prüfen, was die Datei wirklich ist:
+
+```powershell
+Format-Hex workspace | Select-Object -First 1
+```
+
+| Erste Bytes | Bedeutung | Befehl |
+|-------------|-----------|--------|
+| `1F 8B` | gzip-komprimiertes Tar | wie oben: `Rename-Item workspace workspace.tar.gz` → `tar -xf workspace.tar.gz` |
+| `50 4B` | ZIP-Archiv | `Rename-Item workspace workspace.zip` → `Expand-Archive workspace.zip -DestinationPath .` |
+| sonst (Text/`ustar`) | normales Tar | `tar -xf workspace` — funktioniert auch ganz ohne Endung |
+
+Und ganz wichtig: Steht `workspace` im Explorer als **Ordner** (gelbes Symbol) da, ist alles
+schon gut — einfach hineingehen; liegen dort `package.json` und `src/`, direkt mit
+`npm install` weitermachen.
+
 ## Wenn etwas klemmt
 
 | Problem | Lösung |
 |---------|--------|
+| Nach Entpacken nur `workspace` ohne Endung | Doppelt gepackt — siehe Abschnitt darüber |
 | `EADDRINUSE: port 3000` | Der Port ist belegt — anderen Prozess beenden oder Port 3000 in `vite.config.js` ändern |
 | `tar` unbekannt (Windows) | PowerShell statt cmd verwenden oder 7-Zip nehmen |
 | `npm install` bricht ab | `node -v` prüfen (≥ 18), Ordner `node_modules` löschen, erneut `npm install` |

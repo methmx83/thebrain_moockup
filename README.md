@@ -6,6 +6,10 @@ Netzwerk — mit Export der stärksten Erinnerungen als `CLAUDE.md` für deine P
 
 Läuft komplett lokal im Browser. Kein Server, kein Konto, kein Upload.
 
+> **Projekt als `Workspace.tar` heruntergeladen?** Das Archiv **ist** das komplette Projekt —
+> zuerst entpacken, dann hier weitermachen. Die Kurzanleitung dafür steht in
+> [`INSTALLIEREN.md`](./INSTALLIEREN.md) (`tar -xf Workspace.tar` → `npm install` → `npm run dev`).
+
 ---
 
 ## 1 · Voraussetzungen

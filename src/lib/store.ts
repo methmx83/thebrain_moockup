@@ -138,6 +138,22 @@ export function useMemoryStore() {
     setState({ memories: [], linkBoosts: {}, clockOffset: 0, sleepCycles: 0 });
   }, []);
 
+  /** Komplettes Gehirn aus einer Sicherungsdatei wiederherstellen */
+  const restore = useCallback((data: PersistState): boolean => {
+    if (!data || !Array.isArray(data.memories)) return false;
+    const valid = data.memories.every(
+      (m) => m && typeof m.id === "string" && typeof m.content === "string" && typeof m.createdAt === "number"
+    );
+    if (!valid) return false;
+    setState({
+      memories: data.memories,
+      linkBoosts: data.linkBoosts ?? {},
+      clockOffset: data.clockOffset ?? 0,
+      sleepCycles: data.sleepCycles ?? 0,
+    });
+    return true;
+  }, []);
+
   const boostSynapse = useCallback((a: string, b: string) => {
     const key = pairKey(a, b);
     setState((prev) => ({
@@ -170,6 +186,7 @@ export function useMemoryStore() {
     resetClock,
     loadSeeds,
     wipe,
+    restore,
     boostSynapse,
   };
 }

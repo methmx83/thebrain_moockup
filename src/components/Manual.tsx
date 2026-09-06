@@ -526,6 +526,11 @@ export default function Manual({ open, onClose }: Props) {
                   <li><b>Persistenz:</b> Jede Änderung wird sofort gespeichert; ein Neuladen stellt den Zustand wieder her — inklusive Zeitraffer-Offset und Schlafzyklen.</li>
                   <li><b>Privatmodus:</b> Dort lebt der Speicher nur für die Sitzung; danach ist das Gedächtnis leer (wie nach tiefer Narkose).</li>
                   <li>
+                    <b>Sichern &amp; Umziehen:</b> <em>Gehirn sichern</em> (Fußbereich) lädt das komplette Gehirn als
+                    JSON-Datei (Spuren, Synapsen, Zeitraffer, Schlafzyklen). <em>Wiederherstellen</em> liest sie wieder
+                    ein — ideal für Rechnerwechsel, Browserwechsel oder ein zweites Gehirn in einem anderen Browser.
+                  </li>
+                  <li>
                     <b>Beispiele laden:</b> Setzt <em>alles</em> zurück und lädt die 12 Beispiel-Erinnerungen neu —
                     inklusive Nullsetzen von Schlafzyklen und Zeitraffer.
                   </li>

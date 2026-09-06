@@ -18,6 +18,7 @@ import {
   IconBook,
   IconBrainWave,
   IconChart,
+  IconDownload,
   IconFastForward,
   IconFile,
   IconMoon,
@@ -46,6 +47,7 @@ export default function App() {
   const wipeTimer = useRef<number | null>(null);
   const toastId = useRef(0);
   const searchRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const addToast = useCallback((msg: string, kind: Toast["kind"] = "ok") => {
     const id = ++toastId.current;
@@ -139,6 +141,45 @@ export default function App() {
     setConfirmWipe(false);
     addToast("Cortex geleert. Tabula rasa — wie nach einem sehr tiefen Schlaf.", "warn");
   }, [confirmWipe, store, addToast]);
+
+  /* ---- Gehirn sichern & wiederherstellen (JSON) ---- */
+  const exportBackup = useCallback(() => {
+    const payload = {
+      app: "engramm",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      ...store.state,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `engramm-gehirn-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    addToast("Gehirn gesichert — die JSON-Datei ist unterwegs in deinen Downloads.", "ok");
+  }, [store.state, addToast]);
+
+  const importBackup = useCallback(
+    (file: File) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result));
+          if (store.restore(parsed)) {
+            setSelectedId(null);
+            addToast("Gehirn wiederhergestellt — alle Spuren sind zurück.", "ok");
+          } else {
+            addToast("Diese Datei ist keine gültige Engramm-Sicherung.", "warn");
+          }
+        } catch {
+          addToast("Datei nicht lesbar — beschädigtes JSON?", "warn");
+        }
+      };
+      reader.readAsText(file);
+    },
+    [store, addToast]
+  );
 
   /* ---- Hotkeys: / fokussiert die Suche, ? öffnet das Handbuch ---- */
   useEffect(() => {
@@ -365,7 +406,32 @@ export default function App() {
             ENGRAMM · Alle Spuren bleiben lokal in deinem Browser — kein Server, kein Context-Reset.
             Kuratierte Erinnerung: Was du hier stärkst, landet als <span className="font-mono text-mist">CLAUDE.md</span> in deinem Projekt.
           </p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={exportBackup}
+              title="Komplettes Gehirn als JSON-Datei sichern"
+              className="btn-press flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[11.5px] font-semibold text-mist hover:border-teal/50 hover:text-teal"
+            >
+              <IconDownload size={13} /> Gehirn sichern
+            </button>
+            <button
+              onClick={() => fileRef.current?.click()}
+              title="Gehirn aus einer JSON-Sicherung wiederherstellen"
+              className="btn-press flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[11.5px] font-semibold text-mist hover:border-teal/50 hover:text-teal"
+            >
+              <IconReset size={13} /> Wiederherstellen
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) importBackup(f);
+                e.target.value = "";
+              }}
+            />
             <button
               onClick={() => {
                 store.loadSeeds();
